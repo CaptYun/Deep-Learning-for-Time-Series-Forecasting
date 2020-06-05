@@ -170,4 +170,4 @@ yhat = model.predict(x_input, verbose=0)
 ###    
 #### Multi-headed CNN Model
 각 submodel의 output을 prediction이전에 combine해서 output sequence로 보냄
-![Multi-headed](https://user-images.githubusercontent.com/63143652/83852211-6c086a80-a74e-11ea-94ed-5a399ff0e576.jpeg)
+![Multi-headed](https://user-images.githubusercontent.com/63143652/83852211-6c086a80-a74e-11ea-94ed-5a399ff0e576.jpeg){: width="50" height="50"}
