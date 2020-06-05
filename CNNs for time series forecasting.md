@@ -1,7 +1,7 @@
-## CNNs for Time Series Forecasting   
-### Univariate CNN Models   
+## 1.Univariate CNN Models   
 univariate : a single series of observations with a temporal ordering   
-sequence -> input : 3 time steps, output : 1 time step for 1 step prediction     
+sequence -> input : 3 time steps, output : 1 time step for 1 step prediction   
+### 1) Data Preparation   
 ```python
 from numpy import array
 from keras.models import Sequential
@@ -59,8 +59,9 @@ for i in range(len(X)):
 [[60]    
  [70]    
  [80]] 90    
+### 2) CNN Model  
  ```python
- model = Sequential()
+model = Sequential()
 model.add(Conv1D(64, 2, activation='relu', input_shape=(n_steps, n_features)))
 model.add(MaxPooling1D(pool_size=2))
 model.add(Flatten())
@@ -78,7 +79,8 @@ print(yhat)
 ```
 [[100.82957]]
 ##   
-### Multivariate CNN Models
+## 2.Multivariate CNN Models
+### 1) Multiple Input Series   
 ```python
 import numpy as np
 from keras.models import Sequential
@@ -149,6 +151,8 @@ n_features = X.shape[2]
 [[70 75]   
  [80 85]   
  [90 95]] 185   
+ 
+ ### 2) CNN Model   
  ```python
 model = Sequential()
 model.add(Conv1D(64, 2, activation='relu', input_shape=(n_steps, n_features)))
@@ -169,7 +173,7 @@ print(yhat)
 ```
 [[208.13545]]   
 ###    
-#### Multi-headed CNN Model
+#### Multiple Input - Multi-headed CNN Model
 각 submodel의 output을 prediction이전에 combine해서 output sequence로 보냄
 ![Multi-headed](https://user-images.githubusercontent.com/63143652/83852211-6c086a80-a74e-11ea-94ed-5a399ff0e576.jpeg)
 
@@ -237,3 +241,16 @@ yhat = model.predict([x1, x2], verbose=0)
 print(yhat)
 ```
 [[205.70218]]   
+###
+### 2) Multiple Parallel Series     
+#### Multiple Parallel Series - Vector-output CNN Model    
+#### Multiple Parallel Series - Multi-output CNN Model   
+
+
+##   
+## 3.Multi-step CNN Models
+### 1) Data Preparation
+### 2) Vocetor Output Model   
+## 4.Multivariate Multi-step CNN Models    
+### 1) Multiple Input Multi-step Output   
+### 2) Multiple Parallel Input and Multi-step Output   
