@@ -306,9 +306,73 @@ print(yhat)
 [array([[99.81926]], dtype=float32), array([[109.228226]], dtype=float32), array([[210.63351]], dtype=float32)]   
 
 ##   
-## 3.Multi-step CNN Models
-### 1) Data Preparation
+## 3.Multi-step CNN Models   
+### 1) Data Preparation   
+```python
+from numpy import array
+
+def split_sequence(sequence, n_steps_in, n_steps_out):
+  X, y = list(), list()
+  for i in range(len(sequence)):
+    end_ix = i + n_steps_in
+    out_end_ix = end_ix + n_steps_out
+    if out_end_ix > len(sequence):
+      break
+    seq_x, seq_y = sequence[i:end_ix], sequence[end_ix:out_end_ix]
+    X.append(seq_x)
+    y.append(seq_y)
+  return array(X), array(y)
+
+raw_seq = [10,20,30,40,50,60,70,80,90]
+n_steps_in, n_steps_out = 3, 2
+X, y = split_sequence(raw_seq, n_steps_in, n_steps_out)
+
+for i in range(len(X)):
+  print(X[i], y[i])
+```
+[10 20 30] [40 50]   
+[20 30 40] [50 60]   
+[30 40 50] [60 70]   
+[40 50 60] [70 80]   
+[50 60 70] [80 90]   
 ### 2) Vocetor Output Model   
+```python
+n_features = 1
+X = X.reshape((X.shape[0], X.shape[1], n_features))
+
+model = Sequential()
+model.add(Conv1D(64, 2, activation='relu', input_shape=(n_steps_in, n_features)))
+model.add(MaxPooling1D(pool_size=2))
+model.add(Flatten())
+model.add(Dense(50, activation='relu'))
+model.add(Dense(n_steps_out))
+model.compile(optimizer='adam', loss='mse')
+
+model.fit(X, y, epochs=2000, verbose=0)
+
+x_input = array([70, 80, 90])
+x_input = x_input.reshape((1, n_steps_in, n_features))
+yhat = model.predict(x_input, verbose=0)
+print(yhat)
+```
+[[ 99.68114 116.26045]]    
+
 ## 4.Multivariate Multi-step CNN Models    
 ### 1) Multiple Input Multi-step Output   
+[[10 15 25]   
+ [20 25 45]   
+ [30 35 65]   
+ [40 45 85]  
+ [50 55 105]   
+ [60 65 125]   
+ [70 75 145]   
+ [80 85 165]  
+ [90 95 185]]   
+Input:
+10, 15   
+20, 25   
+30, 35   
+output:   
+65   
+85   
 ### 2) Multiple Parallel Input and Multi-step Output   
