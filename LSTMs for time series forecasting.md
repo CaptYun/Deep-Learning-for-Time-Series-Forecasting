@@ -286,5 +286,120 @@ print(yhat)
 ```
 [[100.80308 105.90578 206.38626]]   
 ## Multi-step LSTM Models   
+forecast horizon이나 interval이 1 time step이상     
+```python
+# split a univariate sequence into samples
+from numpy import array
+
+def split_sequence(sequence, n_steps_in, n_steps_out):
+  X, y = list(), list()
+  for i in range(len(sequence)):
+    end_ix = i + n_steps_in
+    out_end_ix = end_ix + n_steps_out
+    if out_end_ix > len(sequence):
+      break
+    seq_x, seq_y = sequence[i:end_ix], sequence[end_ix:out_end_ix]
+    X.append(seq_x)
+    y.append(seq_y)
+  return array(X), array(y)
+
+raw_seq = [10,20,30,40,50,60,70,80,90]
+n_steps_in, n_steps_out = 3, 2
+X, y = split_sequence(raw_seq, n_steps_in, n_steps_out)
+for i in range(len(X)):
+  print(X[i], y[i])
+```
+[10 20 30] [40 50]   
+[20 30 40] [50 60]   
+[30 40 50] [60 70]   
+[40 50 60] [70 80]   
+[50 60 70] [80 90]   
+
+### 1. Vector Output Model   
+LSTM data : [samples, timesteps, features]   
+```python
+n_features = 1 
+X = X.reshape((X.shape[0], X.shape[1], n_features))
+
+from keras.models import Sequential
+from keras.layers import LSTM, Dense
+
+model = Sequential()
+model.add(LSTM(100, activation='relu', return_sequences=True, #LSTM층을 쌓으려면 True
+               input_shape=(n_steps_in, n_features)))
+model.add(LSTM(100, activation='relu'))
+model.add(Dense(n_steps_out))
+model.compile(optimizer='adam', loss='mse')
+model.fit(X, y, epochs=50, verbose=0)
+
+x_input = array([70,80,90])
+x_input = x_input.reshape((1, n_steps_in, n_features))
+yhat = model.predict(x_input, verbose=0)
+print(yhat)
+```
+[[106.42747 136.68587]]   
+
+### 2. Encoder-Decoder Model
+input과 output sequences 모두를 예측하는 문제 (sequence-to-sequence)   
+encoder의 output을 decoder의 input으로 사용한다.   
+```python
+n_features = 1 
+X = X.reshape((X.shape[0], X.shape[1], n_features))
+y = y.reshape((y.shape[0], y.shape[1], n_features))
+
+from keras.models import Sequential
+from keras.layers import LSTM, Dense, RepeatVector, TimeDistributed
+
+model = Sequential()
+# define encoder model (여러 가지 model로 대체 가능) : input sequence를 읽고 interpreting
+model.add(LSTM(100, activation='relu', input_shape=(n_steps_in, n_features)))
+# repeat encoding : output sequence에서 필요한 만큼 반복
+model.add(RepeatVector(n_steps_out))
+# define decoder model
+model.add(LSTM(100, activation='relu', return_sequences=True))
+# define model output : output sequence에서 각각의 1 step prediction에 사용
+model.add(TimeDistributed(Dense(1)))
+model.compile(optimizer='adam', loss='mse')
+model.fit(X, y, epochs=100, verbose=0)
+
+x_input = array([70,80,90])
+x_input = x_input.reshape((1, n_steps_in, n_features))
+yhat = model.predict(x_input, verbose=0)
+print(yhat)
+```
+[[[101.84806]   
+  [114.59619]]]   
 
 ## Multivariate Multi-step LSTM Models   
+```python
+from numpy import array, hstack
+
+def split_sequences(sequences, n_steps_in, n_steps_out):
+  X, y = list(), list()
+  for i in range(len(sequences)):
+    end_ix = i + n_steps_in
+    out_end_ix = end_ix + n_steps_out - 1
+    if out_end_ix > len(sequences):
+      break
+    seq_x, seq_y = sequences[i:end_ix, :-1], sequences[end_ix-1:out_end_ix, -1]
+    X.append(seq_x)
+    y.append(seq_y)
+  return array(X), array(y)
+
+# define input sequence   
+in_seq1 = array([10,20,30,40,50,60,70,80,90])
+in_seq2 = array([15,25,35,45,55,65,75,85,95])
+out_seq = array([in_seq1[i]+in_seq2[i] for i in range(len(in_seq1))])
+
+# convert to [rows, columns] structure  
+in_seq1 = in_seq1.reshape((len(in_seq1), 1))
+in_seq2 = in_seq2.reshape((len(in_seq2), 1))
+out_seq = out_seq.reshape((len(out_seq), 1))
+dataset = hstack((in_seq1, in_seq2, out_seq))
+
+n_steps_in, n_steps_out = 3, 2
+X, y = split_sequences(dataset, n_steps_in, n_steps_out)
+print('X.shape=',X.shape,'\ny.shape=',y.shape)
+for i in range(len(X)):
+  print(X[i], y[i])
+```
