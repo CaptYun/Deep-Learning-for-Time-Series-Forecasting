@@ -371,6 +371,7 @@ print(yhat)
   [114.59619]]]   
 
 ## Multivariate Multi-step LSTM Models   
+### 1. Multiple Input Multi-step Output   
 ```python
 from numpy import array, hstack
 
@@ -403,3 +404,25 @@ print('X.shape=',X.shape,'\ny.shape=',y.shape)
 for i in range(len(X)):
   print(X[i], y[i])
 ```
+<img width="179" alt="스크린샷 2020-06-06 11 30 28" src="https://user-images.githubusercontent.com/63143652/83934133-5bf19900-a7e9-11ea-845f-eebc79abae7f.png">
+
+### # Stacked LSTM
+```python
+n_features = X.shape[2]
+
+from keras.models import Sequential
+from keras.layers import LSTM, Dense
+
+model = Sequential()
+model.add(LSTM(100, activation='relu', return_sequences=True, input_shape=(n_steps_in, n_features)))
+model.add(LSTM(100, activation='relu'))
+model.add(Dense(n_steps_out))
+model.compile(optimizer='adam', loss='mse')
+model.fit(X, y, epochs=200, verbose=0)
+
+x_input = array([[70,75],[80,85],[90,95]])
+x_input = x_input.reshape((1, n_steps_in, n_features))
+yhat = model.predict(x_input, verbose=0)
+print(yhat)
+```
+[[187.99309 208.2324 ]]   
