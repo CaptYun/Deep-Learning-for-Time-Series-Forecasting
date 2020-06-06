@@ -211,6 +211,7 @@ for i in range(len(X)):
 ```
 <img width="168" alt="스크린샷 2020-06-06 10 26 03" src="https://user-images.githubusercontent.com/63143652/83933059-56438580-a7e0-11ea-94f9-81b8f82733ac.png">
 <img width="159" alt="스크린샷 2020-06-06 10 26 13" src="https://user-images.githubusercontent.com/63143652/83933056-53e12b80-a7e0-11ea-969a-31038b793f2b.png">
+
 ```python
 n_features = X.shape[2]  # num_parallel time series   
 
@@ -261,7 +262,28 @@ print('X.shape=',X.shape,'\ny.shape=',y.shape)
 for i in range(len(X)):
   print(X[i], y[i])
 ```
+<img width="254" alt="스크린샷 2020-06-06 10 33 09" src="https://user-images.githubusercontent.com/63143652/83933168-2f398380-a7e1-11ea-96a4-d5561c049968.png">
+RNN에서 return_sequences : https://blog.naver.com/acelhj/221278800093   
+```python
+n_features = X.shape[2]  # num_parallel time series   
 
+from keras.models import Sequential
+from keras.layers import LSTM, Dense
+
+model = Sequential()
+model.add(LSTM(100, activation='relu', return_sequences=True, #LSTM층을 쌓으려면 True
+               input_shape=(n_steps, n_features)))
+model.add(LSTM(100, activation='relu'))
+model.add(Dense(n_features))
+model.compile(optimizer='adam', loss='mse')
+model.fit(X, y, epochs=400, verbose=0)
+
+x_input = array([[70,75,145],[80,85,165],[90,95,185]])
+x_input = x_input.reshape((1, n_steps, n_features))
+yhat = model.predict(x_input, verbose=0)
+print(yhat)
+```
+[[100.80308 105.90578 206.38626]]   
 ## Multi-step LSTM Models   
 
 ## Multivariate Multi-step LSTM Models   
