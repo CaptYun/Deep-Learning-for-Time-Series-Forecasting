@@ -264,6 +264,7 @@ for i in range(len(X)):
 ```
 <img width="254" alt="스크린샷 2020-06-06 10 33 09" src="https://user-images.githubusercontent.com/63143652/83933168-2f398380-a7e1-11ea-96a4-d5561c049968.png">
 RNN에서 return_sequences : https://blog.naver.com/acelhj/221278800093   
+
 ```python
 n_features = X.shape[2]  # num_parallel time series   
 
