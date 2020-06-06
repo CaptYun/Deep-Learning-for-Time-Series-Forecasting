@@ -461,3 +461,28 @@ print('X.shape=',X.shape,'\ny.shape=',y.shape)
 for i in range(len(X)):
   print(X[i], y[i])
 ```
+<img width="267" alt="스크린샷 2020-06-06 11 47 48" src="https://user-images.githubusercontent.com/63143652/83934396-c1df2000-a7eb-11ea-8875-b4a299872abc.png">
+
+#### # multivariate multi-step encoder-decoder LSTM
+```python
+n_features = X.shape[2]
+
+from keras.models import Sequential
+from keras.layers import LSTM, Dense, RepeatVector, TimeDistributed
+
+
+model = Sequential()
+model.add(LSTM(200, activation='relu', input_shape=(n_steps_in, n_features)))
+model.add(RepeatVector(n_steps_out))
+model.add(LSTM(200, activation='relu', return_sequences=True))
+model.add(TimeDistributed(Dense(n_features)))
+model.compile(optimizer='adam', loss='mse')
+model.fit(X, y, epochs=300, verbose=0)
+
+x_input = array([[60,65,125],[70,75,145],[80,85,165]])
+x_input = x_input.reshape((1, n_steps_in, n_features))
+yhat = model.predict(x_input, verbose=0)
+print(yhat)
+```
+[[[ 89.816055  95.67013  186.09004 ]   
+  [100.731    106.29904  206.58772 ]]]  
